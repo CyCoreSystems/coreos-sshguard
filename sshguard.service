@@ -23,7 +23,7 @@ ExecStart=/bin/sh -c 'journalctl -afb -p info -n0 -o cat -t sshd | \
       --insecure-options=image \
       --interactive \
       --net=host \
-      --stage1-name=coreos.com/rkt/stage1-fly:1.21.0 quay.io/genevera/coreos-sshguard \
+      --stage1-name=coreos.com/rkt/stage1-fly:1.21.0 quay.io/cycore/sshguard \
       --caps-retain=CAP_NET_ADMIN'
 
 [Install]
