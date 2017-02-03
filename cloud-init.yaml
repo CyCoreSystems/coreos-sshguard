@@ -1,0 +1,46 @@
+#cloud-config
+
+coreos:
+  units:
+    - name: sshd.socket
+      command: restart
+      runtime: true
+      content: |
+        [Socket]
+        ListenStream=2222
+        FreeBind=true
+        Accept=yes      
+    - name: sshguard.service
+      command: start
+      enable: true
+      content: |
+        [Unit]
+        Description=%p
+        After=network-online.target iptables-restore.service
+        Requires=network-online.target
+
+        [Service]
+        TimeoutStartSec=0
+        Restart=always
+        RestartSec=5s
+
+        # setup sshguard tables
+        ExecStartPre=-/usr/sbin/iptables -N sshguard
+        ExecStartPre=-/usr/sbin/ip6tables -N sshguard
+
+        # link sshguard tables to main INPUT tables
+        ExecStartPre=-/usr/sbin/iptables -D INPUT -j sshguard
+        ExecStartPre=-/usr/sbin/ip6tables -D INPUT -j sshguard
+        ExecStartPre=-/usr/sbin/iptables -A INPUT -j sshguard
+        ExecStartPre=-/usr/sbin/ip6tables -A INPUT -j sshguard
+
+        ExecStart=/bin/sh -c 'journalctl -afb -p info -n0 -o cat -t sshd | \
+           rkt run \
+              --insecure-options=image \
+              --interactive \
+              --net=host \
+              --stage1-name=coreos.com/rkt/stage1-fly:1.21.0 quay.io/cycore/sshguard \
+              --caps-retain=CAP_NET_ADMIN'
+
+        [Install]
+        WantedBy=multi-user.target
