@@ -4,13 +4,16 @@ Wrappers for running sshguard on CoreOS
 
 This version uses `rkt` for execution.
 
-## usage
+## Usage options
 
 ### cloud-config
 
 See [example](/cloud-config.yaml)
 
 ### fleet
+
+The example unit includes the `Global=true` flag for Fleet, which will cause it
+to run automatically on all Fleet nodes.
 
 ```
 fleetctl start sshguard.service
